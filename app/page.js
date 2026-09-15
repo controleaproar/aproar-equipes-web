@@ -1,5 +1,5 @@
-import AproarSystem from "../components/AproarSystem";
+import AproarSystemFixed from "../components/AproarSystemFixed";
 
 export default function HomePage() {
-  return <AproarSystem />;
+  return <AproarSystemFixed />;
 }
