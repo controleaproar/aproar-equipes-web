@@ -8,12 +8,7 @@ O arquivo `app_apontamentos_v6_9_alerta_preto.py` continua sendo a fonte de verd
 
 `nextjs-supervisor-parity`
 
-A branch `main` e a produção devem permanecer intactas até que:
-
-1. a migration Neon oficial esteja aplicada;
-2. o Portal do Supervisor seja testado com dados reais;
-3. os fluxos Hoje / Amanhã / Disponibilidade estejam persistindo e relendo corretamente;
-4. as validações de conflito, indisponibilidade, retroativo, múltiplos serviços e auditoria estejam confirmadas.
+A produção só deve receber o Next.js depois que os fluxos Hoje / Amanhã / Disponibilidade estejam persistindo e relendo corretamente e as validações de conflito, indisponibilidade, retroativo, múltiplos serviços e auditoria estejam confirmadas.
 
 ## O que foi portado nesta etapa
 
@@ -36,7 +31,7 @@ A branch `main` e a produção devem permanecer intactas até que:
 - status, serviço principal e período;
 - Mais opções: extra, observação e 2º serviço;
 - regra de 2º serviço na mesma unidade;
-- preservação dos serviços adicionais de outras unidades ao editar;
+- preservação dos serviços adicionais ao editar;
 - Marcar todos como presentes apenas com todos os serviços definidos;
 - Salvar equipe em lote;
 - apontamento persistido e editável;
@@ -70,24 +65,39 @@ A branch `main` e a produção devem permanecer intactas até que:
 
 ## API
 
-Nova função: `netlify/functions/supervisor.mts`
+Nova função principal: `netlify/functions/supervisor.mts`.
 
-Rota: `/api/supervisor`
+Rota operacional: `/api/supervisor`.
 
-A função antiga `field.mts` foi mantida nesta fase como fallback e referência de migração. Não deve ser removida antes da validação da nova aplicação.
+Foi adicionada uma camada de proteção em `netlify/functions/supervisor-safe.mts`, usada pelo Next.js, que valida no Neon que o segundo serviço pertence à mesma unidade do serviço principal antes de delegar para a API operacional.
+
+A função antiga `field.mts` permanece como fallback e referência de migração nesta fase.
 
 ## Neon
 
-O projeto Neon atual tem duas modelagens:
+Em 15/09/2026 a migration `migration-paridade-python.sql` foi aplicada com sucesso na branch `main` do projeto Neon `aproar-equipes`.
 
-- `main`: tabelas antigas em inglês (`units`, `collaborators`, `convocations`, etc.);
-- branch de migration: tabelas de paridade do Python (`obras`, `colaboradores`, `convocacoes`, `apontamentos`, `servicos_apontamento`, etc.).
+A `main` agora contém as tabelas de paridade do Python:
 
-As tabelas operacionais consultadas estão vazias neste momento, portanto não há registros operacionais no Neon a converter antes da promoção do esquema.
+- `obras`;
+- `colaboradores`;
+- `convocacoes`;
+- `apontamentos`;
+- `servicos_apontamento`;
+- `conflitos_convocacao`;
+- `indisponibilidades`;
+- `auditoria`;
+- `erros_sistema`.
+
+As tabelas antigas em inglês foram mantidas; nenhuma tabela antiga foi removida.
+
+As tabelas operacionais estavam vazias na promoção, portanto não houve registros operacionais a converter ou perder.
 
 ### Invariante de turnos
 
-A migration `migration-regra-sobreposicao-turnos.sql` replica a regra `turnos_se_sobrepoem` do Python também no banco:
+A migration `migration-regra-sobreposicao-turnos.sql` também foi aplicada na `main` em 15/09/2026.
+
+Ela replica a regra `turnos_se_sobrepoem` do Python também no banco:
 
 - Integral conflita com qualquer turno;
 - Manhã conflita com Manhã/Integral;
@@ -95,22 +105,20 @@ A migration `migration-regra-sobreposicao-turnos.sql` replica a regra `turnos_se
 - Noite conflita com Noite/Integral;
 - Manhã + Tarde, Manhã + Noite e Tarde + Noite podem coexistir.
 
+O trigger `trg_aproar_bloquear_convocacao_sobreposta` está ativo na tabela `convocacoes` como última camada de proteção.
+
 O banco não usa `UNIQUE(colaborador_id, data)`, porque essa restrição quebraria a regra de múltiplos turnos compatíveis.
 
-## Antes de mergear
+## Status de deploy
 
-- validar build/deploy preview do Next.js;
-- aplicar/testar a migration completa em branch Neon de teste;
-- validar criação de placeholder por unidade;
-- popular/sincronizar obras e colaboradores reais;
-- executar cenários de paridade do Portal do Supervisor;
-- somente então promover o esquema e configurar produção.
+O PR #1 possui Deploy Preview do Netlify com status de build bem-sucedido.
 
-## Depois do Portal do Supervisor
+Produção continua na branch `main` do GitHub até a conclusão da validação operacional e sincronização dos cadastros reais.
 
-Seguir a ordem do handoff oficial:
+## Próximos passos antes do merge final
 
-1. Controladoria módulo por módulo;
-2. Financeiro;
-3. relatórios/indicadores;
-4. auditoria/manutenção/limpeza operacional completa.
+1. validar o Deploy Preview contra a base principal já migrada;
+2. popular/sincronizar obras e colaboradores reais sem mocks;
+3. executar cenários de paridade do Portal do Supervisor;
+4. tirar o PR de draft e promover o Next.js para produção;
+5. seguir para Controladoria módulo por módulo, depois Financeiro, relatórios/indicadores e manutenção/limpeza operacional.
