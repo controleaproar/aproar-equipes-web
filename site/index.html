@@ -407,12 +407,12 @@ function iconFor(key){
 function currentMode(){return (location.hash||'#login').replace('#','').toLowerCase()}
 function getAuth(){try{return JSON.parse(sessionStorage.getItem(AUTH_KEY)||'{}')}catch(e){return {}}}
 function saveAuth(v){sessionStorage.setItem(AUTH_KEY,JSON.stringify(v))}
-function hasAccess(key){if(key==='visualizacao') return true; const auth=getAuth(); return !!(auth[key]&&auth[key].token)}
+function hasAccess(key){if(key==='visualizacao'||key==='engenheiro') return true; const auth=getAuth(); return !!(auth[key]&&auth[key].token)}
 async function setProfile(key){
-  if(key==='visualizacao'){
+  if(key==='visualizacao' || key==='engenheiro'){
     currentProfile=key; location.hash=profileMeta[key].route; render(); return;
   }
-  const label=key==='suprimentos' ? 'Controladoria e Resultados' : key==='financeiro' ? 'Financeiro' : 'Portal do Supervisor';
+  const label=key==='suprimentos' ? 'Controladoria e Resultados' : 'Financeiro';
   const pwd=window.prompt('Digite a senha de acesso para '+label+':','');
   if(pwd===null) return;
   try{
@@ -449,13 +449,13 @@ function landing(){
     </section>\
     <section class="login-card">\
       <div class="login-head">\
-        <div><div class="topline">Acessos</div><div class="login-title">Escolha como entrar</div><div class="login-sub">Controladoria e Resultados, Financeiro e Portal do Supervisor exigem autenticação. Consulta de Indicadores permanece aberta.</div></div>\
+        <div><div class="topline">Acessos</div><div class="login-title">Escolha como entrar</div><div class="login-sub">Controladoria e Resultados e Financeiro exigem autenticação. Portal do Supervisor e Consulta de Indicadores permanecem abertos.</div></div>\
         <div class="brand-badge small">A</div>\
       </div>\
       <div class="profile-grid">\
         ${profileCard('suprimentos','Painel administrativo completo','Administração do sistema, operação, relatórios e manutenção.',['Painel completo','Desktop','Senha'])}\
         ${profileCard('financeiro','Portal focado no fechamento financeiro','Extras, faltas, atestados e relatórios do ciclo semanal.',['Financeiro','Desktop','Senha'])}\
-        ${profileCard('engenheiro','Portal do supervisor','Convocação, apontamento diário e disponibilidade.',['Senha','Mobile','Equipe'])}\
+        ${profileCard('engenheiro','Portal do supervisor','Convocação, apontamento diário e disponibilidade.',['Aberto','Mobile','Equipe'])}\
         ${profileCard('visualizacao','Consulta sem edição','Dashboard, relatórios e indicadores em modo somente leitura.',['Aberto','Sem edição','Compartilhável'])}\
       </div>\
       <div class="login-foot">Você pode me pedir ajustes depois por aqui. A ideia é seguir evoluindo o visual sem mexer na lógica de funcionamento que já foi validada.</div>\
