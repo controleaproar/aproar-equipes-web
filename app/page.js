@@ -1,5 +1,5 @@
-import SupervisorPortalSafe from "../components/SupervisorPortalSafe";
+import AproarSystem from "../components/AproarSystem";
 
 export default function HomePage() {
-  return <SupervisorPortalSafe />;
+  return <AproarSystem />;
 }
