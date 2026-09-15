@@ -1,0 +1,13 @@
+{
+  "name": "aproar-equipes-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/functions": "^4.2.5",
+    "postgres": "^3.4.7"
+  }
+}
