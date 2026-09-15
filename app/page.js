@@ -1,5 +1,5 @@
-import SupervisorPortal from "../components/SupervisorPortal";
+import SupervisorPortalSafe from "../components/SupervisorPortalSafe";
 
 export default function HomePage() {
-  return <SupervisorPortal />;
+  return <SupervisorPortalSafe />;
 }
