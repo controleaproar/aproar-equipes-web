@@ -16,37 +16,29 @@ CREATE OR REPLACE FUNCTION aproar_normalizar_turno(valor TEXT)
 RETURNS TEXT
 LANGUAGE SQL
 IMMUTABLE
-AS $$
-  SELECT CASE
-    WHEN UPPER(TRIM(COALESCE(valor, 'Integral'))) IN ('MANHÃ', 'MANHA') THEN 'MANHA'
-    WHEN UPPER(TRIM(COALESCE(valor, 'Integral'))) = 'TARDE' THEN 'TARDE'
-    WHEN UPPER(TRIM(COALESCE(valor, 'Integral'))) = 'NOITE' THEN 'NOITE'
-    ELSE 'INTEGRAL'
-  END;
-$$;
+AS 'SELECT CASE
+  WHEN UPPER(TRIM(COALESCE(valor, ''Integral''))) IN (''MANHÃ'', ''MANHA'') THEN ''MANHA''
+  WHEN UPPER(TRIM(COALESCE(valor, ''Integral''))) = ''TARDE'' THEN ''TARDE''
+  WHEN UPPER(TRIM(COALESCE(valor, ''Integral''))) = ''NOITE'' THEN ''NOITE''
+  ELSE ''INTEGRAL''
+END';
 
 CREATE OR REPLACE FUNCTION aproar_turnos_sobrepoem(turno_a TEXT, turno_b TEXT)
 RETURNS BOOLEAN
 LANGUAGE SQL
 IMMUTABLE
-AS $$
-  SELECT
-    aproar_normalizar_turno(turno_a) = 'INTEGRAL'
-    OR aproar_normalizar_turno(turno_b) = 'INTEGRAL'
-    OR aproar_normalizar_turno(turno_a) = aproar_normalizar_turno(turno_b);
-$$;
+AS 'SELECT
+  aproar_normalizar_turno(turno_a) = ''INTEGRAL''
+  OR aproar_normalizar_turno(turno_b) = ''INTEGRAL''
+  OR aproar_normalizar_turno(turno_a) = aproar_normalizar_turno(turno_b)';
 
 CREATE OR REPLACE FUNCTION aproar_bloquear_convocacao_sobreposta()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-AS $$
-DECLARE
+AS 'DECLARE
   conflito RECORD;
 BEGIN
-  SELECT
-    c.id,
-    c.engenheiro,
-    c.turno
+  SELECT c.id, c.engenheiro, c.turno
   INTO conflito
   FROM convocacoes c
   WHERE c.colaborador_id = NEW.colaborador_id
@@ -58,18 +50,17 @@ BEGIN
 
   IF FOUND THEN
     RAISE EXCEPTION USING
-      ERRCODE = '23505',
+      ERRCODE = ''23505'',
       MESSAGE = FORMAT(
-        'Convocação sobreposta: colaborador já possui convocação %s (%s, %s) nesta data.',
+        ''Convocação sobreposta: colaborador já possui convocação %s (%s, %s) nesta data.'',
         conflito.id,
-        COALESCE(conflito.engenheiro, '-'),
-        COALESCE(conflito.turno, 'Integral')
+        COALESCE(conflito.engenheiro, ''-''),
+        COALESCE(conflito.turno, ''Integral'')
       );
   END IF;
 
   RETURN NEW;
-END;
-$$;
+END';
 
 DROP TRIGGER IF EXISTS trg_aproar_bloquear_convocacao_sobreposta ON convocacoes;
 
