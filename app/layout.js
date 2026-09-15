@@ -1,8 +1,9 @@
 import "./globals.css";
+import "./system.css";
 
 export const metadata = {
   title: "APROAR Equipes",
-  description: "Portal operacional de equipes da APROAR Engenharia",
+  description: "Gestão de equipes da APROAR Engenharia",
 };
 
 export default function RootLayout({ children }) {
