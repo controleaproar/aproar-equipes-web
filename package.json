@@ -1,13 +1,18 @@
 {
   "name": "aproar-equipes-web",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@netlify/functions": "^4.2.5",
-    "postgres": "^3.4.7"
+    "next": "16.3.5",
+    "postgres": "^3.4.7",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
   }
 }
